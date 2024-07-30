@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privada</title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+</head>
+<body>
+    <h1 id="welcomeMessage">Has Ingresado con éxito (aquí debe ir el mail del agente)</h1>
+    <a id="linkRestringida" href="#" class="fs-4">Continuar</a>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha256/0.9.0/sha256.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const token = localStorage.getItem("token");
+
+            if (!token) {
+                alert("Token no encontrado. Inicia sesión nuevamente.");
+                location.href = "/login";
+                return;
+            }
+
+            // Decodificar el token JWT para obtener los datos del agente
+            function parseJwt(token) {
+                const base64Url = token.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                }).join(''));
+
+                return JSON.parse(jsonPayload);
+            }
+
+            const agente = parseJwt(token);
+
+            // Mostrar el email del agente en el mensaje de bienvenida
+            const welcomeMessage = document.getElementById("welcomeMessage");
+            welcomeMessage.textContent = `Has Ingresado con éxito ${agente.email}`;
+
+            // Manejar el enlace a la página restringida
+            document.getElementById("linkRestringida").addEventListener("click", () => {
+                location.href = `/restringida?token=${token}`;
+            });
+        });
+    </script>
+</body>
+<style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background: black;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      height: 60vh;
+    }
+</style>
+</html>
